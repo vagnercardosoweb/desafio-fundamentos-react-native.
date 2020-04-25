@@ -36,13 +36,29 @@ interface Product {
 }
 
 const Cart: React.FC = () => {
-  const {
-    increment,
-    decrement,
-    products,
-    cartTotal,
-    totalItensInCart,
-  } = useCart();
+  const { increment, decrement, products } = useCart();
+
+  const cartTotal = useMemo(
+    () =>
+      formatValue(
+        products.reduce((total, product) => {
+          total += product.price * product.quantity;
+
+          return total;
+        }, 0),
+      ),
+    [products],
+  );
+
+  const totalItensInCart = useMemo(
+    () =>
+      products.reduce((total, product) => {
+        total += product.quantity;
+
+        return total;
+      }, 0),
+    [products],
+  );
 
   function handleIncrement(id: string): void {
     increment(id);

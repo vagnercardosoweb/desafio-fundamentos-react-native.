@@ -4,11 +4,9 @@ import React, {
   useCallback,
   useContext,
   useEffect,
-  useMemo,
 } from 'react';
 
 import AsyncStorage from '@react-native-community/async-storage';
-import formatValue from '../utils/formatValue';
 
 interface Product {
   id: string;
@@ -20,11 +18,9 @@ interface Product {
 
 interface CartContext {
   products: Product[];
-  addToCart(item: Product): void;
+  addToCart(item: Omit<Product, 'quantity'>): void;
   increment(id: string): void;
   decrement(id: string): void;
-  cartTotal: number;
-  totalItensInCart: number;
 }
 
 const CartContext = createContext<CartContext | null>(null);
@@ -50,7 +46,7 @@ const CartProvider: React.FC = ({ children }) => {
     })();
   }, [products]);
 
-  const addToCart = useCallback((product: Product) => {
+  const addToCart = useCallback((product: Omit<Product, 'quantity'>) => {
     setProducts(old => {
       const newProducts = [...old];
       const findIndex = newProducts.findIndex(p => p.id === product.id);
@@ -58,7 +54,7 @@ const CartProvider: React.FC = ({ children }) => {
       if (findIndex !== -1) {
         newProducts[findIndex].quantity += 1;
       } else {
-        newProducts.push(product);
+        newProducts.push({ ...product, quantity: 1 });
       }
 
       return newProducts;
@@ -95,38 +91,14 @@ const CartProvider: React.FC = ({ children }) => {
     });
   }, []);
 
-  const cartTotal = useMemo(
-    () =>
-      formatValue(
-        products.reduce((total, product) => {
-          total += product.price * product.quantity;
-
-          return total;
-        }, 0),
-      ),
-    [products],
-  );
-
-  const totalItensInCart = useMemo(
-    () =>
-      products.reduce((total, product) => {
-        total += product.quantity;
-
-        return total;
-      }, 0),
-    [products],
-  );
-
   const value = React.useMemo(
     () => ({
       addToCart,
       increment,
       decrement,
       products,
-      cartTotal,
-      totalItensInCart,
     }),
-    [products, addToCart, increment, decrement, cartTotal, totalItensInCart],
+    [products, addToCart, increment, decrement],
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

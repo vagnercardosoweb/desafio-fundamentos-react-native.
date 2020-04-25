@@ -20,16 +20,13 @@ import { useCart } from '../../hooks/cart';
 
 const FloatingCart: React.FC = () => {
   const { products } = useCart();
-
   const navigation = useNavigation();
 
   const cartTotal = useMemo(
     () =>
       formatValue(
         products.reduce((total, product) => {
-          total += product.price * product.quantity;
-
-          return total;
+          return total + product.price * product.quantity;
         }, 0),
       ),
     [products],
@@ -38,9 +35,7 @@ const FloatingCart: React.FC = () => {
   const totalItensInCart = useMemo(
     () =>
       products.reduce((total, product) => {
-        total += product.quantity;
-
-        return total;
+        return total + product.quantity;
       }, 0),
     [products],
   );
